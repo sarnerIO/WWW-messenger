@@ -2,52 +2,14 @@
 <html>
 <head>
   <title>Messenger</title>
-  <style>
-    body {
-      font-family: Arial;
-      background: #0f172a;
-      color: white;
-      text-align: center;
-    }
-
-    input {
-      padding: 10px;
-      margin: 5px;
-      border-radius: 8px;
-      border: none;
-    }
-
-    button {
-      padding: 10px 15px;
-      border: none;
-      border-radius: 8px;
-      background: #3b82f6;
-      color: white;
-      cursor: pointer;
-    }
-
-    #chat {
-      max-width: 400px;
-      margin: 20px auto;
-      text-align: left;
-    }
-
-    .msg {
-      background: #1e293b;
-      padding: 8px;
-      margin: 5px 0;
-      border-radius: 8px;
-    }
-  </style>
 </head>
 <body>
 
-<h2>🔥 Simple Messenger</h2>
+<h2>🔥 Messenger</h2>
 
 <div id="auth">
   <input id="email" placeholder="email">
-  <input id="password" placeholder="password" type="password">
-  <br>
+  <input id="password" type="password" placeholder="password">
   <button onclick="register()">Регистрация</button>
   <button onclick="login()">Вход</button>
 </div>
@@ -62,13 +24,14 @@
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+
 import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
 import {
   getFirestore,
@@ -77,61 +40,85 @@ import {
   onSnapshot,
   query,
   orderBy
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-// 🔴 ВСТАВЬ СВОИ ДАННЫЕ ИЗ FIREBASE
+// ✅ ТВОЙ CONFIG УЖЕ ВСТАВЛЕН
 const firebaseConfig = {
   apiKey: "AIzaSyC4L0ofr9cxc7QFVjkCKnNjoSfm3GXglSA",
   authDomain: "m-f8447.firebaseapp.com",
-    projectId: "m-f8447"
+  databaseURL: "https://m-f8447-default-rtdb.firebaseio.com",
+  projectId: "m-f8447",
+  storageBucket: "m-f8447.firebasestorage.app",
+  messagingSenderId: "368502901572",
+  appId: "1:368502901572:web:e3e8bccf8f40505681e511",
+  measurementId: "G-80JBYRXTSB"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Регистрация
+// элементы
+const authDiv = document.getElementById("auth");
+const chatUI = document.getElementById("chatUI");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const msgInput = document.getElementById("msg");
+const chatDiv = document.getElementById("chat");
+
+// регистрация
 window.register = async () => {
-  await createUserWithEmailAndPassword(auth, email.value, password.value);
+  try {
+    await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+    alert("Аккаунт создан");
+  } catch (e) {
+    alert(e.message);
+  }
 };
 
-// Логин
+// вход
 window.login = async () => {
-  await signInWithEmailAndPassword(auth, email.value, password.value);
+  try {
+    await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+    alert("Вход выполнен");
+  } catch (e) {
+    alert(e.message);
+  }
 };
 
-// Отправка
+// отправка сообщений
 window.send = async () => {
-  if (!msg.value) return;
+  if (!msgInput.value) return;
 
   await addDoc(collection(db, "messages"), {
-    text: msg.value,
+    text: msgInput.value,
     user: auth.currentUser.email,
     time: Date.now()
   });
 
-  msg.value = "";
+  msgInput.value = "";
 };
 
-// Отслеживание входа
+// отслеживание входа
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    auth.style.display = "none";
+    authDiv.style.display = "none";
     chatUI.style.display = "block";
+
     document.getElementById("user").innerText = user.email;
 
     const q = query(collection(db, "messages"), orderBy("time"));
 
     onSnapshot(q, (snapshot) => {
-      chat.innerHTML = "";
+      chatDiv.innerHTML = "";
+
       snapshot.forEach(doc => {
         const data = doc.data();
 
         const div = document.createElement("div");
-        div.className = "msg";
         div.innerText = data.user + ": " + data.text;
 
-        chat.appendChild(div);
+        chatDiv.appendChild(div);
       });
     });
   }
