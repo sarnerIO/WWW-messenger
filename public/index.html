@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>WWW — закрытый мессенджер</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <!-- Экран авторизации -->
+    <div id="auth-screen" class="auth-screen">
+      <div class="auth-container">
+        <h1>WWW</h1>
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="login">Вход</button>
+          <button class="tab-btn" data-tab="register">Регистрация</button>
+        </div>
+        <form id="login-form" class="auth-form">
+          <input type="text" placeholder="Имя пользователя" id="login-username" required>
+          <input type="password" placeholder="Пароль" id="login-password" required>
+          <button type="submit">Войти</button>
+          <div class="error-message"></div>
+        </form>
+        <form id="register-form" class="auth-form hidden">
+          <input type="text" placeholder="Имя пользователя" id="reg-username" required>
+          <input type="password" placeholder="Пароль" id="reg-password" required>
+          <button type="submit">Зарегистрироваться</button>
+          <div class="error-message"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Основной интерфейс мессенджера -->
+    <div id="messenger-screen" class="messenger-screen hidden">
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="user-info" id="user-info">
+            <div class="avatar" id="user-avatar">👤</div>
+            <div class="user-details">
+              <span id="user-name"></span>
+              <span id="user-id"></span>
+            </div>
+          </div>
+          <div class="sidebar-actions">
+            <button id="theme-toggle"><i class="fas fa-moon"></i></button>
+            <button id="lang-toggle"><i class="fas fa-globe"></i></button>
+            <button id="new-chat-btn"><i class="fas fa-plus"></i></button>
+          </div>
+        </div>
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" id="search-input" placeholder="Поиск...">
+        </div>
+        <div class="chats-list" id="chats-list">
+          <!-- Динамически загружаемые чаты -->
+        </div>
+      </div>
+
+      <div class="chat-area" id="chat-area">
+        <div class="chat-header" id="chat-header">
+          <div class="chat-info">
+            <h3 id="chat-name"></h3>
+            <span id="chat-status"></span>
+          </div>
+          <div class="chat-actions">
+            <button id="chat-info-btn"><i class="fas fa-info-circle"></i></button>
+          </div>
+        </div>
+        <div class="messages-container" id="messages-container">
+          <div class="messages" id="messages">
+            <!-- Сообщения -->
+          </div>
+        </div>
+        <div class="input-area">
+          <div class="emoji-picker" id="emoji-picker" style="display: none;">
+            <!-- Свои смайлы -->
+          </div>
+          <div class="message-input-wrapper">
+            <button id="emoji-btn"><i class="fas fa-smile"></i></button>
+            <input type="text" id="message-input" placeholder="Сообщение...">
+            <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
+            <!-- Внутри .message-input-wrapper -->
+<button id="voice-btn"><i class="fas fa-microphone"></i></button>
+<button id="file-btn"><i class="fas fa-paperclip"></i></button>
+
+<!-- Модальное окно для редактирования сообщения -->
+<div id="edit-message-modal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h3>Редактировать сообщение</h3>
+    <textarea id="edit-message-input" rows="3"></textarea>
+    <button id="save-edit-btn">Сохранить</button>
+  </div>
+</div>
+
+<!-- Модальное окно для информации о чате (роли, приглашения) -->
+<div id="chat-info-modal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h3>Информация о чате</h3>
+    <div id="chat-members-list"></div>
+    <div id="invite-section">
+      <p>Пригласительная ссылка:</p>
+      <input type="text" id="invite-link" readonly>
+      <button id="copy-invite-btn">Копировать</button>
+    </div>
+    <div id="moderation-section" class="hidden">
+      <h4>Управление участниками</h4>
+      <select id="member-select"></select>
+      <button id="promote-member">Назначить модератором</button>
+      <button id="kick-member">Исключить</button>
+    </div>
+  </div>
+</div>
+          </div>
+          <div class="typing-indicator" id="typing-indicator"></div>
+        </div>
+      </div>
+
+      <!-- Модальное окно для создания чата/группы -->
+      <div id="new-chat-modal" class="modal hidden">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h3>Новый чат</h3>
+          <div class="modal-tabs">
+            <button class="modal-tab active" data-type="direct">Личный чат</button>
+            <button class="modal-tab" data-type="group">Группа</button>
+          </div>
+          <div id="direct-chat-form">
+            <input type="text" id="user-search" placeholder="Поиск по ID или имени">
+            <div id="search-results"></div>
+          </div>
+          <div id="group-chat-form" class="hidden">
+            <input type="text" id="group-name" placeholder="Название группы">
+            <button id="create-group-btn">Создать</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="locales.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
