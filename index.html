@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Messenger</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+    }
+
+    input {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      background: #3b82f6;
+      color: white;
+      cursor: pointer;
+    }
+
+    #chat {
+      max-width: 400px;
+      margin: 20px auto;
+      text-align: left;
+    }
+
+    .msg {
+      background: #1e293b;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>🔥 Simple Messenger</h2>
+
+<div id="auth">
+  <input id="email" placeholder="email">
+  <input id="password" placeholder="password" type="password">
+  <br>
+  <button onclick="register()">Регистрация</button>
+  <button onclick="login()">Вход</button>
+</div>
+
+<div id="chatUI" style="display:none;">
+  <h3 id="user"></h3>
+
+  <input id="msg" placeholder="Сообщение">
+  <button onclick="send()">Отправить</button>
+
+  <div id="chat"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// 🔴 ВСТАВЬ СВОИ ДАННЫЕ ИЗ FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyC4L0ofr9cxc7QFVjkCKnNjoSfm3GXglSA",
+  authDomain: "m-f8447.firebaseapp.com",
+    projectId: "m-f8447"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Регистрация
+window.register = async () => {
+  await createUserWithEmailAndPassword(auth, email.value, password.value);
+};
+
+// Логин
+window.login = async () => {
+  await signInWithEmailAndPassword(auth, email.value, password.value);
+};
+
+// Отправка
+window.send = async () => {
+  if (!msg.value) return;
+
+  await addDoc(collection(db, "messages"), {
+    text: msg.value,
+    user: auth.currentUser.email,
+    time: Date.now()
+  });
+
+  msg.value = "";
+};
+
+// Отслеживание входа
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    auth.style.display = "none";
+    chatUI.style.display = "block";
+    document.getElementById("user").innerText = user.email;
+
+    const q = query(collection(db, "messages"), orderBy("time"));
+
+    onSnapshot(q, (snapshot) => {
+      chat.innerHTML = "";
+      snapshot.forEach(doc => {
+        const data = doc.data();
+
+        const div = document.createElement("div");
+        div.className = "msg";
+        div.innerText = data.user + ": " + data.text;
+
+        chat.appendChild(div);
+      });
+    });
+  }
+});
+</script>
+
+</body>
+</html>
